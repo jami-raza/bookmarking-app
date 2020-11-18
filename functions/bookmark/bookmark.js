@@ -12,9 +12,12 @@ const typeDefs = gql`
     id: ID!
     title: String!
     url: String!
+    desc: String!
   }
   type Mutation {
-    addbookmark(title: String!, url: String!): bookmar
+    addbookmark(title: String!, url: String!, desc: String!): bookmar
+    delbookmark(id:ID!): bookmar
+    
   }
 `
 
@@ -41,6 +44,7 @@ const resolvers = {
             id:d.ref.id,
             title: d.data.title,
             url: d.data.url,
+            desc: d.data.desc,
           }
         })
       }catch(err){
@@ -51,13 +55,14 @@ const resolvers = {
    
   },
   Mutation: {
-    addbookmark: async (_, { title, url }) => {
+    addbookmark: async (_, { title, url, desc }) => {
       try{
         const result = await client.query(
           q.Create(q.Collection('Bookmark'),{
             data:{
               title,
-              url
+              url,
+              desc
             }
           })
         )
@@ -66,7 +71,23 @@ const resolvers = {
       catch(err){
         console.log(err)
       }
-    }
+    },
+    delbookmark: async (_, {id}) => {
+      try {
+        const result = await client.query(
+          q.Delete(q.Ref(q.Collection('Bookmark'),
+          id
+          ))
+        );
+          console.log(result)
+          return result.data.data
+
+      }catch(err){
+        console.log(err)
+      }
+    },
+    
+    
   }
 }
 
